@@ -2,8 +2,6 @@
 pub enum Screen {
     Menu,
     Practice,
-    Review,
-    Custom,
 }
 
 #[derive(Debug)]
@@ -19,8 +17,8 @@ impl App {
         Self {
             current_screen: Screen::Menu,
             menu_items: vec![
-                "Continue (Group 1)",
-                "Practice Weak",
+                "Continue Learning (Group 1)",
+                "Revise Weak",
                 "Review Marks",
                 "Custom Query",
                 "Exit",
@@ -43,13 +41,9 @@ impl App {
     }
 
     pub fn select(&mut self) {
-        match self.selected {
-            0 => self.current_screen = Screen::Practice,
-            1 => self.current_screen = Screen::Practice,
-            2 => self.current_screen = Screen::Review,
-            3 => self.current_screen = Screen::Custom,
-            4 => self.should_quit = true,
-            _ => {}
+        match self.menu_items[self.selected] {
+            "Exit" => self.should_quit = true,
+            _ => self.current_screen = Screen::Practice,
         }
     }
 }

@@ -1,7 +1,7 @@
 use anyhow::Result;
-use crossterm::event::{self, Event, KeyCode};
+use crossterm::event::{self, Event};
 
-use crate::ui::screens::{custom, menu, practice, review};
+use crate::ui::screens::{menu, practice};
 
 use super::{
     app::{App, Screen},
@@ -16,17 +16,12 @@ pub fn run() -> Result<()> {
         terminal.draw(|f| match app.current_screen {
             Screen::Menu => menu::render(f, &app),
             Screen::Practice => practice::render(f, &app),
-            Screen::Review => review::render(f, &app),
-            Screen::Custom => custom::render(f, &app),
         })?;
 
         if let Event::Key(key) = event::read()? {
-            match key.code {
-                KeyCode::Char('q') => break,
-                KeyCode::Down | KeyCode::Char('j') => app.next(),
-                KeyCode::Up | KeyCode::Char('k') => app.previous(),
-                KeyCode::Enter => app.select(),
-                _ => {}
+            match app.current_screen {
+                Screen::Menu => menu::handle_event(&mut app, key),
+                Screen::Practice => practice::handle_event(&mut app, key),
             }
         }
 

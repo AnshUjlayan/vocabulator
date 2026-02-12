@@ -6,6 +6,17 @@ use ratatui::{
 };
 
 use crate::ui::app::App;
+use crossterm::event::{KeyCode, KeyEvent};
+
+pub fn handle_event(app: &mut App, key: KeyEvent) {
+    match key.code {
+        KeyCode::Char('q') => app.should_quit = true,
+        KeyCode::Down | KeyCode::Char('j') => app.next(),
+        KeyCode::Up | KeyCode::Char('k') => app.previous(),
+        KeyCode::Enter => app.select(),
+        _ => {}
+    }
+}
 
 pub fn render(f: &mut Frame, app: &App) {
     let chunks = Layout::default()
