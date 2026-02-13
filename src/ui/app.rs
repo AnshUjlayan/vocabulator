@@ -2,6 +2,7 @@
 pub enum Screen {
     Menu,
     Practice,
+    Test,
 }
 
 #[derive(Debug)]
@@ -21,6 +22,7 @@ impl App {
                 "Revise Weak",
                 "Review Marks",
                 "Custom Query",
+                "Test",
                 "Exit",
             ],
             selected: 0,
@@ -41,9 +43,10 @@ impl App {
     }
 
     pub fn select(&mut self) {
-        match self.menu_items[self.selected] {
-            "Exit" => self.should_quit = true,
-            _ => self.current_screen = Screen::Practice,
+        match self.selected {
+            0..=3 => self.current_screen = Screen::Practice,
+            4 => self.current_screen = Screen::Test,
+            _ => self.should_quit = true,
         }
     }
 }
@@ -71,7 +74,7 @@ mod tests {
     #[test]
     fn test_exit_sets_flag() {
         let mut app = App::new();
-        app.selected = 4;
+        app.selected = 5;
         app.select();
         assert!(app.should_quit);
     }

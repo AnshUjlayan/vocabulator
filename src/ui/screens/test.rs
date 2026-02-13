@@ -13,7 +13,7 @@ pub fn handle_event(app: &mut App, key: KeyEvent) {
 }
 
 pub fn render(f: &mut Frame, _app: &App) {
-    let block = Block::default().title("Practice").borders(Borders::ALL);
+    let block = Block::default().title("Test").borders(Borders::ALL);
 
     f.render_widget(block, f.size());
 }
