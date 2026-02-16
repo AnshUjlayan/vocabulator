@@ -1,8 +1,6 @@
-use super::session::Session;
+use crate::core::practice;
+use crate::core::session::Session;
 
 pub fn start_session() -> Session {
-    Session {
-        words: vec![],
-        index: 0,
-    }
+    practice::start_session()
 }
