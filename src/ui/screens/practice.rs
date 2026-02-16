@@ -159,4 +159,42 @@ fn render_button(frame: &mut Frame, area: Rect, label: &str, key: &str) {
     frame.render_widget(button, area);
 }
 
-pub fn handle_event(app: &mut App, key: KeyEvent) {}
+pub fn handle_event(app: &mut App, key: KeyEvent) {
+    let session = match &mut app.session {
+        Some(s) => s,
+        None => return,
+    };
+
+    match key.code {
+        KeyCode::Char('q') | KeyCode::Esc => {
+            app.session = None;
+            app.current_screen = Screen::Menu;
+        }
+        KeyCode::Char('s') => {
+            session.show_definition = true;
+        }
+        KeyCode::Char('y') => {
+            if session.show_definition {
+                session.graded = Some(true);
+            }
+        }
+        KeyCode::Char('n') => {
+            if session.show_definition {
+                session.graded = Some(false);
+            }
+        }
+        KeyCode::Char('m') => {
+            let word = session.current_mut();
+            word.marked = !word.marked;
+        }
+        KeyCode::Enter => {
+            if session.show_definition && session.graded.is_some() {
+                if session.index + 1 < session.words.len() {
+                    session.index += 1;
+                    session.reset_ui_state();
+                }
+            }
+        }
+        _ => {}
+    }
+}
