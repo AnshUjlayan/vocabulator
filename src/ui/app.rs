@@ -1,4 +1,5 @@
 use crate::core::session::Session;
+use rusqlite::Connection;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Screen {
@@ -9,6 +10,7 @@ pub enum Screen {
 
 #[derive(Debug)]
 pub struct App {
+    pub conn: Connection,
     pub current_screen: Screen,
     pub menu_items: Vec<&'static str>,
     pub selected: usize,
@@ -17,11 +19,12 @@ pub struct App {
 }
 
 impl App {
-    pub fn new() -> Self {
+    pub fn new(conn: Connection) -> Self {
         Self {
+            conn,
             current_screen: Screen::Menu,
             menu_items: vec![
-                "Continue Learning (Group 1)",
+                "Continue Learning",
                 "Revise Weak",
                 "Review Marks",
                 "Custom Query",
@@ -61,7 +64,7 @@ mod tests {
 
     #[test]
     fn test_navigation_wraps_forward() {
-        let mut app = App::new();
+        let mut app = App::new(Connection::open_in_memory().unwrap());
         app.selected = app.menu_items.len() - 1;
         app.next();
         assert_eq!(app.selected, 0);
@@ -69,7 +72,7 @@ mod tests {
 
     #[test]
     fn test_navigation_wraps_backward() {
-        let mut app = App::new();
+        let mut app = App::new(Connection::open_in_memory().unwrap());
         app.selected = 0;
         app.previous();
         assert_eq!(app.selected, app.menu_items.len() - 1);
@@ -77,7 +80,7 @@ mod tests {
 
     #[test]
     fn test_exit_sets_flag() {
-        let mut app = App::new();
+        let mut app = App::new(Connection::open_in_memory().unwrap());
         app.selected = 5;
         app.select();
         assert!(app.should_quit);

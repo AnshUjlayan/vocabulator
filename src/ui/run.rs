@@ -1,6 +1,7 @@
 use crate::ui::screens::{menu, practice, test};
 use anyhow::Result;
 use crossterm::event::{self, Event};
+use rusqlite::Connection;
 
 use super::{
     app::{App, Screen},
@@ -9,7 +10,7 @@ use super::{
 
 pub fn run() -> Result<()> {
     let mut terminal = init_terminal()?;
-    let mut app = App::new();
+    let mut app = App::new(Connection::open("vocab.db")?);
 
     loop {
         terminal.draw(|f| match app.current_screen {
