@@ -24,11 +24,10 @@ impl App {
             conn,
             current_screen: Screen::Menu,
             menu_items: vec![
-                "Continue Learning",
+                "Continue",
                 "Revise Weak",
                 "Review Marks",
                 "Custom Query",
-                "Test",
                 "Exit",
             ],
             selected: 0,
@@ -50,10 +49,9 @@ impl App {
     }
 
     pub fn select(&mut self) {
-        match self.selected {
-            0..=3 => self.current_screen = Screen::Practice,
-            4 => self.current_screen = Screen::Test,
-            _ => self.should_quit = true,
+        match self.menu_items[self.selected] {
+            "Exit" => self.should_quit = true,
+            _ => self.current_screen = Screen::Practice,
         }
     }
 }
@@ -81,7 +79,8 @@ mod tests {
     #[test]
     fn test_exit_sets_flag() {
         let mut app = App::new(Connection::open_in_memory().unwrap());
-        app.selected = 5;
+        app.selected = app.menu_items.iter().position(|&x| x == "Exit").unwrap();
+        println!("selected -> {}", app.selected);
         app.select();
         assert!(app.should_quit);
     }
