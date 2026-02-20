@@ -1,5 +1,5 @@
-use crate::core;
-use crate::ui::app::{App, Screen};
+use crate::core::session;
+use crate::ui::app::{App, MenuAction};
 use crossterm::event::{KeyCode, KeyEvent};
 use ratatui::{
     Frame,
@@ -16,16 +16,15 @@ pub fn handle_event(app: &mut App, key: KeyEvent) {
         KeyCode::Up | KeyCode::Char('k') => app.previous(),
         KeyCode::Enter => {
             app.select();
-            match app.current_screen {
-                Screen::Practice => {
-                    let session = core::practice::start_session();
-                    app.session = Some(session);
+
+            if let MenuAction::Session(session_type) = app.menu_items[app.selected] {
+                match session::start_session(&app.conn, session_type) {
+                    Ok((session, screen)) => {
+                        app.session = Some(session);
+                        app.current_screen = screen;
+                    }
+                    Err(e) => app.error = Some(e.to_string()),
                 }
-                Screen::Test => {
-                    let session = core::test::start_session();
-                    app.session = Some(session);
-                }
-                _ => {}
             }
         }
         _ => {}
@@ -41,7 +40,7 @@ pub fn render(f: &mut Frame, app: &App) {
     let items: Vec<ListItem> = app
         .menu_items
         .iter()
-        .map(|item| ListItem::new(*item))
+        .map(|item| ListItem::new(item.label()))
         .collect();
 
     let mut state = ListState::default();

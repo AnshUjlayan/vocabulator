@@ -1,4 +1,4 @@
-use crate::core::session::Session;
+use crate::core::session::{Session, Type};
 use rusqlite::Connection;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -8,14 +8,30 @@ pub enum Screen {
     Test,
 }
 
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub enum MenuAction {
+    Session(Type),
+    Exit,
+}
+
+impl MenuAction {
+    pub fn label(&self) -> &'static str {
+        match self {
+            MenuAction::Session(t) => t.label(),
+            MenuAction::Exit => "Exit",
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct App {
     pub conn: Connection,
     pub current_screen: Screen,
-    pub menu_items: Vec<&'static str>,
+    pub menu_items: Vec<MenuAction>,
     pub selected: usize,
     pub should_quit: bool,
     pub session: Option<Session>,
+    pub error: Option<String>,
 }
 
 impl App {
@@ -24,15 +40,16 @@ impl App {
             conn,
             current_screen: Screen::Menu,
             menu_items: vec![
-                "Continue",
-                "Revise Weak",
-                "Review Marks",
-                "Custom Query",
-                "Exit",
+                MenuAction::Session(Type::Group),
+                MenuAction::Session(Type::Marked),
+                MenuAction::Session(Type::Weak),
+                MenuAction::Session(Type::Custom),
+                MenuAction::Exit,
             ],
             selected: 0,
             should_quit: false,
             session: None,
+            error: None,
         }
     }
 
@@ -50,8 +67,8 @@ impl App {
 
     pub fn select(&mut self) {
         match self.menu_items[self.selected] {
-            "Exit" => self.should_quit = true,
-            _ => self.current_screen = Screen::Practice,
+            MenuAction::Exit => self.should_quit = true,
+            _ => {}
         }
     }
 }
@@ -79,8 +96,11 @@ mod tests {
     #[test]
     fn test_exit_sets_flag() {
         let mut app = App::new(Connection::open_in_memory().unwrap());
-        app.selected = app.menu_items.iter().position(|&x| x == "Exit").unwrap();
-        println!("selected -> {}", app.selected);
+        app.selected = app
+            .menu_items
+            .iter()
+            .position(|x| *x == MenuAction::Exit)
+            .unwrap();
         app.select();
         assert!(app.should_quit);
     }
