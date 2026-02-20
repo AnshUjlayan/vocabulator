@@ -8,6 +8,57 @@ use ratatui::{
     widgets::{Block, Borders, Padding, Paragraph},
 };
 
+pub fn handle_event(app: &mut App, key: KeyEvent) {
+    let session = match &mut app.session {
+        Some(s) => s,
+        None => return,
+    };
+
+    match key.code {
+        KeyCode::Char('q') | KeyCode::Esc if !session.insert_mode => {
+            app.session = None;
+            app.current_screen = Screen::Menu;
+        }
+
+        KeyCode::Char('i') if !session.insert_mode => {
+            session.insert_mode = true;
+        }
+
+        KeyCode::Esc if session.insert_mode => {
+            session.insert_mode = false;
+        }
+
+        KeyCode::Char(c) if session.insert_mode => {
+            session.input_buffer.push(c);
+        }
+
+        KeyCode::Backspace if session.insert_mode => {
+            session.input_buffer.pop();
+        }
+
+        KeyCode::Char('m') => {
+            let word = session.current_mut();
+            word.marked = !word.marked;
+        }
+
+        KeyCode::Enter => {
+            if session.graded.is_none() {
+                let word = session.current();
+                let correct = session.input_buffer.trim().eq_ignore_ascii_case(&word.word);
+                session.graded = Some(correct);
+                session.insert_mode = false;
+            } else {
+                if session.index + 1 < session.words.len() {
+                    session.index += 1;
+                    session.reset_ui_state();
+                }
+            }
+        }
+
+        _ => {}
+    }
+}
+
 pub fn render(frame: &mut Frame, app: &App) {
     let session = match &app.session {
         Some(s) => s,
@@ -179,61 +230,4 @@ fn render_button(frame: &mut Frame, area: Rect, label: &str, key: &str) {
         .block(Block::default().borders(Borders::ALL));
 
     frame.render_widget(button, area);
-}
-
-pub fn handle_event(app: &mut App, key: KeyEvent) {
-    let session = match &mut app.session {
-        Some(s) => s,
-        None => return,
-    };
-
-    match key.code {
-        // Quit (only if not inserting)
-        KeyCode::Char('q') | KeyCode::Esc if !session.insert_mode => {
-            app.session = None;
-            app.current_screen = Screen::Menu;
-        }
-
-        // Enter insert mode
-        KeyCode::Char('i') if !session.insert_mode => {
-            session.insert_mode = true;
-        }
-
-        // Exit insert mode
-        KeyCode::Esc if session.insert_mode => {
-            session.insert_mode = false;
-        }
-
-        // Typing
-        KeyCode::Char(c) if session.insert_mode => {
-            session.input_buffer.push(c);
-        }
-
-        KeyCode::Backspace if session.insert_mode => {
-            session.input_buffer.pop();
-        }
-
-        // Toggle mark
-        KeyCode::Char('m') => {
-            let word = session.current_mut();
-            word.marked = !word.marked;
-        }
-
-        // Submit / Next
-        KeyCode::Enter => {
-            if session.graded.is_none() {
-                let word = session.current();
-                let correct = session.input_buffer.trim().eq_ignore_ascii_case(&word.word);
-                session.graded = Some(correct);
-                session.insert_mode = false;
-            } else {
-                if session.index + 1 < session.words.len() {
-                    session.index += 1;
-                    session.reset_ui_state();
-                }
-            }
-        }
-
-        _ => {}
-    }
 }
