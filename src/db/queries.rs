@@ -198,7 +198,7 @@ mod tests {
             definition: "b".into(),
             group_id: 1,
             marked: true,
-            last_seen: 10,
+            last_seen: Some(10),
             times_seen: 5,
             success_count: 4,
         };

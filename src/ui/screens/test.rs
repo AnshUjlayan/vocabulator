@@ -1,3 +1,4 @@
+use crate::core::utils;
 use crate::ui::app::{App, Screen};
 use crossterm::event::{KeyCode, KeyEvent};
 use ratatui::{
@@ -128,7 +129,9 @@ pub fn render(frame: &mut Frame, app: &App) {
     // ───────── STATS ─────────
     let stats = Paragraph::new(format!(
         "Last Seen: {}\nAccuracy: {}/{}",
-        word.last_seen, word.success_count, word.times_seen
+        utils::relative_time(word.last_seen),
+        word.success_count,
+        word.times_seen
     ))
     .block(
         Block::default()
