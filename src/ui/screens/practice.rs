@@ -1,4 +1,4 @@
-use crate::core::utils;
+use crate::core::{actions, utils};
 use crate::ui::app::{App, Screen};
 use crossterm::event::{KeyCode, KeyEvent};
 use ratatui::{
@@ -38,9 +38,9 @@ pub fn handle_event(app: &mut App, key: KeyEvent) {
         }
         KeyCode::Enter => {
             if session.show_definition && session.graded.is_some() {
-                if session.index + 1 < session.words.len() {
-                    session.index += 1;
-                    session.reset_ui_state();
+                if let Err(e) = actions::handle_enter(app) {
+                    app.error = Some(e.to_string());
+                    app.current_screen = Screen::Menu;
                 }
             }
         }
