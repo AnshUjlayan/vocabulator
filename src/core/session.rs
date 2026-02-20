@@ -66,6 +66,7 @@ impl Session {
     pub fn advance(&mut self) -> bool {
         if self.index + 1 >= self.words.len() {
             self.index = 0;
+            self.reset_ui_state();
             true
         } else {
             self.index += 1;

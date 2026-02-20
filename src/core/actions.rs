@@ -26,7 +26,11 @@ pub fn handle_enter(app: &mut App) -> Result<()> {
     }
 
     if finished {
-        app.current_screen = Screen::Test;
+        if app.current_screen == Screen::Test {
+            app.current_screen = Screen::Menu;
+        } else {
+            app.current_screen = Screen::Test;
+        }
     }
 
     Ok(())
