@@ -20,8 +20,23 @@ pub fn handle_event(app: &mut App, key: KeyEvent) {
             if let MenuAction::Session(session_type) = app.menu_items[app.selected] {
                 match session::start_session(&app.conn, session_type) {
                     Ok((session, screen)) => {
-                        app.session = Some(session);
-                        app.current_screen = screen;
+                        if session.index < session.words.len() {
+                            app.session = Some(session);
+                            app.current_screen = screen;
+                        } else {
+                            let err: String;
+                            if session.words.is_empty() {
+                                err = "Word list is empty".to_string();
+                            } else {
+                                err = format!(
+                                    "Index {} out of bounds for vector of length {}. Db corrupted",
+                                    session.index,
+                                    session.words.len()
+                                )
+                                .to_string();
+                            }
+                            app.error = Some(err);
+                        }
                     }
                     Err(e) => app.error = Some(e.to_string()),
                 }
