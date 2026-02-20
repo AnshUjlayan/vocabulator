@@ -62,6 +62,17 @@ impl Session {
         self.input_buffer.clear();
         self.insert_mode = false;
     }
+
+    pub fn advance(&mut self) -> bool {
+        if self.index + 1 >= self.words.len() {
+            self.index = 0;
+            true
+        } else {
+            self.index += 1;
+            self.reset_ui_state();
+            false
+        }
+    }
 }
 
 pub fn start_session(conn: &Connection, session_type: Type) -> Result<(Session, Screen)> {
