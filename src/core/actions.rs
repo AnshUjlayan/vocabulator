@@ -9,8 +9,9 @@ pub fn handle_enter(app: &mut App) -> Result<()> {
         return Ok(());
     }
 
+    let correct = session.graded.unwrap();
     let word = session.current_mut();
-    progress::update_word_stats(&app.conn, word)?;
+    progress::update_word_stats(&app.conn, word, correct)?;
 
     let finished = session.advance();
 
