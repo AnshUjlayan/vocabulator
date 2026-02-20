@@ -1,4 +1,5 @@
 use crate::core::session::{Session, Type};
+use crate::core::tutorial::TutorialState;
 use rusqlite::Connection;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -6,11 +7,14 @@ pub enum Screen {
     Menu,
     Practice,
     Test,
+    TutorialPrompt,
+    Tutorial,
 }
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum MenuAction {
     Session(Type),
+    RestartTutorial,
     Exit,
 }
 
@@ -18,6 +22,7 @@ impl MenuAction {
     pub fn label(&self) -> &'static str {
         match self {
             MenuAction::Session(t) => t.label(),
+            MenuAction::RestartTutorial => "Restart Tutorial",
             MenuAction::Exit => "Exit",
         }
     }
@@ -32,6 +37,7 @@ pub struct App {
     pub should_quit: bool,
     pub session: Option<Session>,
     pub error: Option<String>,
+    pub tutorial_state: Option<TutorialState>,
 }
 
 impl App {
@@ -43,13 +49,20 @@ impl App {
                 MenuAction::Session(Type::Group),
                 MenuAction::Session(Type::Marked),
                 MenuAction::Session(Type::Weak),
+                MenuAction::RestartTutorial,
                 MenuAction::Exit,
             ],
             selected: 0,
             should_quit: false,
             session: None,
             error: None,
+            tutorial_state: None,
         }
+    }
+
+    #[cfg(test)]
+    pub fn new_test() -> Self {
+        Self::new(Connection::open_in_memory().unwrap())
     }
 
     pub fn next(&mut self) {
@@ -102,5 +115,21 @@ mod tests {
             .unwrap();
         app.select();
         assert!(app.should_quit);
+    }
+
+    #[test]
+    fn test_restart_tutorial_option_exists() {
+        let app = App::new(Connection::open_in_memory().unwrap());
+        let has_restart = app
+            .menu_items
+            .iter()
+            .any(|x| *x == MenuAction::RestartTutorial);
+        assert!(has_restart, "Menu should contain RestartTutorial option");
+    }
+
+    #[test]
+    fn test_restart_tutorial_label() {
+        let action = MenuAction::RestartTutorial;
+        assert_eq!(action.label(), "Restart Tutorial");
     }
 }

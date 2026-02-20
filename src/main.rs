@@ -1,3 +1,4 @@
+mod audio;
 mod core;
 mod db;
 mod seed;

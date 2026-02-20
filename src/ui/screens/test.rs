@@ -1,3 +1,4 @@
+use crate::audio;
 use crate::core::{actions, utils};
 use crate::ui::app::{App, Screen};
 use crossterm::event::{KeyCode, KeyEvent};
@@ -34,6 +35,7 @@ pub fn handle_event(app: &mut App, key: KeyEvent) {
         KeyCode::Char('m') => {
             let word = session.current_mut();
             word.marked = !word.marked;
+            audio::play_mark_sound();
         }
         KeyCode::Enter => {
             if session.graded.is_none() {
@@ -42,6 +44,13 @@ pub fn handle_event(app: &mut App, key: KeyEvent) {
                 session.graded = Some(correct);
                 session.show_definition = true;
                 session.insert_mode = false;
+                
+                // Play sound based on correctness
+                if correct {
+                    audio::play_correct_sound();
+                } else {
+                    audio::play_wrong_sound();
+                }
             } else {
                 if let Err(e) = actions::handle_enter(app) {
                     app.error = Some(e.to_string());

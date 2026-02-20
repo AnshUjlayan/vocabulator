@@ -141,6 +141,24 @@ pub fn save_progress(conn: &Connection, progress: (Screen, i32, usize)) -> Resul
     Ok(())
 }
 
+pub fn get_tutorial_completed(conn: &Connection) -> Result<bool> {
+    let value: i32 = conn
+        .query_row(
+            "SELECT value FROM app_state WHERE key=?1",
+            params!["tutorial_completed"],
+            |row| row.get(0),
+        )
+        .unwrap_or(0);
+
+    Ok(value == 1)
+}
+
+pub fn set_tutorial_completed(conn: &Connection, completed: bool) -> Result<()> {
+    let value = if completed { 1 } else { 0 };
+    upsert_state(conn, "tutorial_completed", value)?;
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -192,5 +210,34 @@ mod tests {
             .unwrap();
 
         assert_eq!(v, 5);
+    }
+
+    #[test]
+    fn test_get_tutorial_completed_default() {
+        let conn = setup();
+
+        // When key doesn't exist, should return false
+        let completed = get_tutorial_completed(&conn).unwrap();
+        assert_eq!(completed, false);
+    }
+
+    #[test]
+    fn test_set_and_get_tutorial_completed() {
+        let conn = setup();
+
+        // Set to true
+        set_tutorial_completed(&conn, true).unwrap();
+        let completed = get_tutorial_completed(&conn).unwrap();
+        assert_eq!(completed, true);
+
+        // Set to false
+        set_tutorial_completed(&conn, false).unwrap();
+        let completed = get_tutorial_completed(&conn).unwrap();
+        assert_eq!(completed, false);
+
+        // Set to true again
+        set_tutorial_completed(&conn, true).unwrap();
+        let completed = get_tutorial_completed(&conn).unwrap();
+        assert_eq!(completed, true);
     }
 }

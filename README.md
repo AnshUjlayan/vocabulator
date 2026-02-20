@@ -23,6 +23,10 @@ asciinema play assets/demo.cast
 - Resume sessions with saved position
 - Tracks exposure, success rate, and last seen timestamps
 - Lightweight, offline-first design
+- Interactive tutorial for new users
+- Sound effects for better feedback
+
+For detailed instructions, see [HOW_TO_PLAY.md](HOW_TO_PLAY.md)
 
 ## Installation
 
