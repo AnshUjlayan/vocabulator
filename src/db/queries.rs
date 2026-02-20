@@ -144,31 +144,13 @@ pub fn save_progress(conn: &Connection, progress: (Screen, i32, usize)) -> Resul
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::db::schema::INIT_SCHEMA;
     use rusqlite::Connection;
 
     fn setup() -> Connection {
         let conn = Connection::open_in_memory().unwrap();
 
-        conn.execute_batch(
-            "
-            CREATE TABLE app_state(
-                key TEXT PRIMARY KEY,
-                value INTEGER
-            );
-
-            CREATE TABLE words(
-                id INTEGER PRIMARY KEY,
-                word TEXT,
-                definition TEXT,
-                group_id INTEGER,
-                marked INTEGER,
-                last_seen INTEGER,
-                times_seen INTEGER,
-                success_count INTEGER
-            );
-        ",
-        )
-        .unwrap();
+        conn.execute_batch(INIT_SCHEMA).unwrap();
 
         conn
     }
