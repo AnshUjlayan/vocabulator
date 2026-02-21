@@ -17,7 +17,11 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    Seed { file: String },
+    /// Seed the database from a provided file path
+    Seed {
+        /// The path to the seed file (e.g., data/vocab.txt)
+        file: String,
+    },
 }
 
 fn main() -> Result<()> {
