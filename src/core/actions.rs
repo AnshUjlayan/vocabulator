@@ -28,6 +28,12 @@ pub fn handle_enter(app: &mut App) -> Result<()> {
 
     if finished {
         if app.current_screen == Screen::Test {
+            if session.session_type == session::Type::Group {
+                progress::save_progress(
+                    &app.conn,
+                    (Screen::Practice, session.current().group_id + 1, 0),
+                )?;
+            }
             app.current_screen = Screen::Menu;
         } else {
             app.current_screen = Screen::Test;

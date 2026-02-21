@@ -59,6 +59,14 @@ pub fn fetch_progress(conn: &Connection) -> Result<(Screen, i32, usize)> {
     Ok((int_to_screen(mode), group_id, index as usize))
 }
 
+pub fn fetch_final_group(conn: &Connection) -> Result<Option<i32>> {
+    Ok(
+        conn.query_row("SELECT MAX(group_id) FROM words", [], |row| {
+            row.get::<_, Option<i32>>(0)
+        })?,
+    )
+}
+
 pub fn fetch_words_by_group(conn: &Connection, group_id: i32) -> Result<Vec<Word>> {
     let mut stmt = conn.prepare(
         "SELECT id, word, definition, group_id,
@@ -192,5 +200,27 @@ mod tests {
             .unwrap();
 
         assert_eq!(v, 5);
+    }
+
+    #[test]
+    fn test_fetch_final_group() {
+        let conn = setup();
+        let g = fetch_final_group(&conn).unwrap();
+        assert_eq!(g, None);
+
+        conn.execute(
+            "INSERT INTO words(word,definition,group_id) VALUES('a','b',1)",
+            [],
+        )
+        .unwrap();
+
+        conn.execute(
+            "INSERT INTO words(word,definition,group_id) VALUES('c','d',3)",
+            [],
+        )
+        .unwrap();
+
+        let g = fetch_final_group(&conn).unwrap();
+        assert_eq!(g, Some(3));
     }
 }
