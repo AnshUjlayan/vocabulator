@@ -100,6 +100,7 @@ pub fn fetch_weak_words(conn: &Connection) -> Result<Vec<Word>> {
                 marked, last_seen, times_seen, success_count
          FROM words
          WHERE times_seen>0
+         AND success_count != times_seen
          ORDER BY 1.0*success_count/times_seen ASC
          LIMIT 20",
     )?;
